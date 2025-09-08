@@ -33,9 +33,14 @@ def is_ball_in_arc(ball_pos, CIRCLE_CENTER, start_angle, end_angle):
 
 
 pygame.init()
+SCALE = 3
 WIDTH = 450
 HEIGHT = 800
 window = pygame.display.set_mode((WIDTH, HEIGHT))
+mask_surface = pygame.Surface((WIDTH * SCALE, HEIGHT * SCALE), pygame.SRCALPHA)
+ORIGINAL_WIDTH, ORIGINAL_HEIGHT = window.get_size()
+WIDTH *= SCALE
+HEIGHT *= SCALE
 clock = pygame.time.Clock()
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -49,17 +54,17 @@ LIGHTBLUE = (0, 150, 255)
 font = pygame.font.Font('freesansbold.ttf', 30)
 
 CIRCLE_CENTER = np.array([WIDTH / 2, HEIGHT / 2], dtype=np.float64)
-CIRCLE_RADIUS = 150
+CIRCLE_RADIUS = 150 * SCALE
 
-BALL_RADIUS = 8
-ball_pos = np.array([WIDTH / 2, HEIGHT / 2 - 120], dtype=np.float64)
+BALL_RADIUS = 5 * SCALE
+ball_pos = np.array([WIDTH / 2, HEIGHT / 2 - 120 * SCALE], dtype=np.float64)
 
-GRAVITY = 0.1
+GRAVITY = 0.1 * SCALE
 spinning_speed = 0.02
 arc_degree = 30
 start_angle = math.radians(-arc_degree / 2)
 end_angle = math.radians(arc_degree / 2)
-ball_vel = np.array([0.2, 0.2], dtype=np.float64)
+ball_vel = np.array([0.2 * SCALE, 0.2 * SCALE], dtype=np.float64)
 balls = [Ball(ball_pos, ball_vel)]
 counter = 1
 
@@ -71,9 +76,8 @@ snippets = [pygame.mixer.Sound(os.path.join(snippet_dir, f))
 current_snippet = 0
 last_bounce_time = 0
 
-background_image = pygame.image.load("bulgaria.png").convert()
-background_image = pygame.transform.scale(background_image, (CIRCLE_RADIUS * 2, CIRCLE_RADIUS * 2))
-mask_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+background_image = pygame.image.load("brazil.png").convert()
+background_image = pygame.transform.scale(background_image, (CIRCLE_RADIUS * 2 / SCALE, CIRCLE_RADIUS * 2 / SCALE))
 mask_surface.fill(BLUE)
 
 running = True
@@ -100,11 +104,11 @@ while running:
                     whoosh_sfx.play()
                     ball.whoosh = False
                     balls.append(
-                        Ball(position=[WIDTH // 2, HEIGHT // 2 - 120],
-                             velocity=[random.uniform(-1, 1), random.uniform(-0.2, 0.2)]))
+                        Ball(position=[WIDTH // 2, HEIGHT // 2 - 120 * SCALE],
+                             velocity=[random.uniform(-1, 1) * SCALE, random.uniform(-0.2, 0.2) * SCALE]))
                     balls.append(
-                        Ball(position=[WIDTH // 2, HEIGHT // 2 - 120],
-                             velocity=[random.uniform(-1, 1), random.uniform(-0.2, 0.2)]))
+                        Ball(position=[WIDTH // 2, HEIGHT // 2 - 120 * SCALE],
+                             velocity=[random.uniform(-1, 1) * SCALE, random.uniform(-0.2, 0.2) * SCALE]))
                     counter += 2
                 ball.is_in = False
 
@@ -120,18 +124,19 @@ while running:
 
     mask_surface.fill(BLACK)
     window.fill(WHITE)
-    background_image_box = background_image.get_rect(center=CIRCLE_CENTER)
+    background_image_box = background_image.get_rect(center=CIRCLE_CENTER / SCALE)
     window.blit(background_image, background_image_box)
-    pygame.draw.circle(mask_surface, WHITE, CIRCLE_CENTER, CIRCLE_RADIUS, 4)
+    pygame.draw.circle(mask_surface, WHITE, CIRCLE_CENTER, CIRCLE_RADIUS, 4 * SCALE)
     draw_arc(mask_surface, CIRCLE_CENTER, CIRCLE_RADIUS, start_angle, end_angle)
     for ball in balls:
-        #if ball.is_in:
-            pygame.draw.circle(mask_surface, (255,255,255, 20 if ball.is_in else 255), ball.pos, BALL_RADIUS)
-        #else:
-           # pygame.draw.circle(mask_surface, WHITE, ball.pos, BALL_RADIUS, 2)
+        pygame.draw.circle(mask_surface, (255, 255, 255, 20 if ball.is_in else 255), ball.pos, BALL_RADIUS)
+
+    scaled = pygame.transform.smoothscale(mask_surface, (ORIGINAL_WIDTH, ORIGINAL_HEIGHT))
+    window.blit(scaled, (0, 0))
+
     ball_counter = font.render(f"Balls: {counter}", True, WHITE)
-    mask_surface.blit(ball_counter, (20, 200))
-    window.blit(mask_surface, (0, 0))
+    window.blit(ball_counter, (20, 200))
+
     pygame.display.flip()
     clock.tick(60)
 
