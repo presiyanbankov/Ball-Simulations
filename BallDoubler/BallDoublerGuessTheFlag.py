@@ -76,8 +76,11 @@ snippets = [pygame.mixer.Sound(os.path.join(snippet_dir, f))
 current_snippet = 0
 last_bounce_time = 0
 
-background_image = pygame.image.load("brazil.png").convert()
-background_image = pygame.transform.scale(background_image, (CIRCLE_RADIUS * 2 / SCALE, CIRCLE_RADIUS * 2 / SCALE))
+background_image = pygame.image.load("vietnam.png").convert()
+background_image = pygame.transform.scale(background_image,
+                                          (background_image.get_width()/background_image.get_height()
+                                           *CIRCLE_RADIUS*2/SCALE,
+                                           CIRCLE_RADIUS * 2 / SCALE))
 mask_surface.fill(BLUE)
 
 running = True
